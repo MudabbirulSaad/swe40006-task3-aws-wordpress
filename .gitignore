@@ -1,0 +1,48 @@
+# Local credentials and configuration
+.private/
+.aws/
+.env
+.env.*
+!.env.example
+*credentials*.json
+*password*.txt
+*.pem
+*.ppk
+*.key
+wp-config.php
+parameters.local.json
+
+# Generated data, backups and execution records
+04_evidence/
+evidence/
+logs/
+*.log
+*.jsonl
+deployment-state.json
+execution-events.jsonl
+*.sql
+*.sql.gz
+*.tar.gz
+*.zip
+
+# Reports and course material
+01_sources/
+02_plan/
+03_report/
+06_submission/
+output/
+*.pdf
+*.docx
+
+# Local Python environment and editor files
+.venv/
+venv/
+.runtime/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.idea/
+.vscode/
+tmp/
+.DS_Store
+Thumbs.db
