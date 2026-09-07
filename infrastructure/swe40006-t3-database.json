@@ -1,0 +1,81 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Task 3 private single-AZ MariaDB; existing database migration follows verification of Pass",
+  "Parameters": {
+    "MasterPassword": {
+      "Type": "String",
+      "NoEcho": true,
+      "MinLength": 8
+    }
+  },
+  "Resources": {
+    "DbSubnets": {
+      "Type": "AWS::RDS::DBSubnetGroup",
+      "Properties": {
+        "DBSubnetGroupName": "swe40006-t3-db-subnets",
+        "DBSubnetGroupDescription": "Two private task subnets",
+        "SubnetIds": [
+          "subnet-07dc4b07b02f3ee2f",
+          "subnet-01e1c513ddfc1b010"
+        ],
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "swe40006-t3"
+          }
+        ]
+      }
+    },
+    "Database": {
+      "Type": "AWS::RDS::DBInstance",
+      "DeletionPolicy": "Snapshot",
+      "UpdateReplacePolicy": "Snapshot",
+      "Properties": {
+        "DBInstanceIdentifier": "swe40006-t3-db",
+        "Engine": "mariadb",
+        "EngineVersion": "10.11.19",
+        "DBInstanceClass": "db.t4g.micro",
+        "AllocatedStorage": "20",
+        "StorageType": "gp3",
+        "StorageEncrypted": true,
+        "MasterUsername": "t3master",
+        "MasterUserPassword": {
+          "Ref": "MasterPassword"
+        },
+        "DBSubnetGroupName": {
+          "Ref": "DbSubnets"
+        },
+        "VPCSecurityGroups": [
+          "sg-05df2fd65526caff3"
+        ],
+        "PubliclyAccessible": false,
+        "MultiAZ": false,
+        "BackupRetentionPeriod": 1,
+        "AutoMinorVersionUpgrade": true,
+        "CopyTagsToSnapshot": true,
+        "DeletionProtection": false,
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "swe40006-t3"
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "DatabaseEndpoint": {
+      "Value": {
+        "Fn::GetAtt": [
+          "Database",
+          "Endpoint.Address"
+        ]
+      }
+    },
+    "DatabaseId": {
+      "Value": {
+        "Ref": "Database"
+      }
+    }
+  }
+}
