@@ -1,0 +1,32 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::swe40006-t3-783161929831-artifacts/releases/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": "ssm:GetParameter",
+      "Resource": [
+        "arn:aws:ssm:ap-southeast-2:783161929831:parameter/swe40006/t3/runtime/wp-config"
+      ]
+    },
+    {
+      "Effect": "Deny",
+      "Action": [
+        "ssm:GetParameter",
+        "ssm:GetParameters",
+        "ssm:GetParametersByPath"
+      ],
+      "NotResource": [
+        "arn:aws:ssm:ap-southeast-2:783161929831:parameter/swe40006/t3/runtime/wp-config"
+      ]
+    }
+  ]
+}
