@@ -1,0 +1,109 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Task 3 fixed 2-node ASG across two AZs; runtime secrets outside AMI and user data",
+  "Resources": {
+    "WebTemplate": {
+      "Type": "AWS::EC2::LaunchTemplate",
+      "Properties": {
+        "LaunchTemplateName": "swe40006-t3-web-template",
+        "VersionDescription": "WordPress 7.1 clean AMI; SSM runtime config; no SSH",
+        "LaunchTemplateData": {
+          "ImageId": "ami-038be112234bc0de4",
+          "InstanceType": "t3.micro",
+          "SecurityGroupIds": [
+            "sg-00ae5f319bf00cd08"
+          ],
+          "IamInstanceProfile": {
+            "Name": "swe40006-t3-web-profile"
+          },
+          "MetadataOptions": {
+            "HttpTokens": "required",
+            "HttpEndpoint": "enabled"
+          },
+          "CreditSpecification": {
+            "CpuCredits": "standard"
+          },
+          "BlockDeviceMappings": [
+            {
+              "DeviceName": "/dev/xvda",
+              "Ebs": {
+                "VolumeSize": 12,
+                "VolumeType": "gp3",
+                "Encrypted": true,
+                "DeleteOnTermination": true
+              }
+            }
+          ],
+          "UserData": "IyEvYmluL2Jhc2gKc2V0IC1FZXVvIHBpcGVmYWlsCnVtYXNrIDA3NwpleGVjID4gPih0ZWUgLWEgL3Zhci9sb2cvdGFzazMtd2ViLXN0YXJ0dXAubG9nKSAyPiYxCnRyYXAgJ2VjaG8gIldFQl9TVEFSVFVQX0VSUk9SIGxpbmU9JExJTkVOTyBleGl0PSQ/ICQoZGF0ZSAtSXMpIicgRVJSCmV4cG9ydCBBV1NfREVGQVVMVF9SRUdJT049YXAtc291dGhlYXN0LTIKZWNobyAiRmluYWwgd2ViIHN0YXJ0dXAgJChkYXRlIC1JcykiCnN5c3RlbWN0bCBzdG9wIGh0dHBkCmZvciBhdHRlbXB0IGluICQoc2VxIDEgMTgpOyBkbwogIGlmIGF3cyBzc20gZ2V0LXBhcmFtZXRlciAtLW5hbWUgL3N3ZTQwMDA2L3QzL3J1bnRpbWUvd3AtY29uZmlnIC0td2l0aC1kZWNyeXB0aW9uIC0tcXVlcnkgUGFyYW1ldGVyLlZhbHVlIC0tb3V0cHV0IHRleHQgPiAvdmFyL3d3dy9odG1sL3dwLWNvbmZpZy5waHAucGVuZGluZzsgdGhlbiBicmVhazsgZmkKICBzbGVlcCA1CmRvbmUKdGVzdCAtcyAvdmFyL3d3dy9odG1sL3dwLWNvbmZpZy5waHAucGVuZGluZwpwaHAgLWwgL3Zhci93d3cvaHRtbC93cC1jb25maWcucGhwLnBlbmRpbmcKaW5zdGFsbCAtbyByb290IC1nIGFwYWNoZSAtbSA2NDAgL3Zhci93d3cvaHRtbC93cC1jb25maWcucGhwLnBlbmRpbmcgL3Zhci93d3cvaHRtbC93cC1jb25maWcucGhwCnJtIC92YXIvd3d3L2h0bWwvd3AtY29uZmlnLnBocC5wZW5kaW5nClRPS0VOPSQoY3VybCAtZnNTIC1YIFBVVCBodHRwOi8vMTY5LjI1NC4xNjkuMjU0L2xhdGVzdC9hcGkvdG9rZW4gLUggJ1gtYXdzLWVjMi1tZXRhZGF0YS10b2tlbi10dGwtc2Vjb25kczogNjAnKQpOT0RFPSQoY3VybCAtZnNTIC1IICJYLWF3cy1lYzItbWV0YWRhdGEtdG9rZW46ICRUT0tFTiIgaHR0cDovLzE2OS4yNTQuMTY5LjI1NC9sYXRlc3QvbWV0YS1kYXRhL2luc3RhbmNlLWlkKQpwcmludGYgJyVzXG4nICIkTk9ERSIgPiAvdmFyL3d3dy9odG1sL25vZGUudHh0CmNobW9kIDY0NCAvdmFyL3d3dy9odG1sL25vZGUudHh0CnByaW50ZiAnSGVhZGVyIGFsd2F5cyBzZXQgWC1UYXNrMy1Ob2RlICIlcyJcbicgIiROT0RFIiA+IC9ldGMvaHR0cGQvY29uZi5kL3Rhc2szLW5vZGUuY29uZgpjYXQgPiAvdmFyL3d3dy9odG1sL2hlYWx0aC5waHAgPDwnUEhQJwo8P3BocApoZWFkZXIoJ0NvbnRlbnQtVHlwZTogYXBwbGljYXRpb24vanNvbicpOwpoZWFkZXIoJ0NhY2hlLUNvbnRyb2w6IG5vLXN0b3JlJyk7CmVjaG8ganNvbl9lbmNvZGUoWydzdGF0dXMnPT4nb2snLCdub2RlJz0+dHJpbShmaWxlX2dldF9jb250ZW50cyhfX0RJUl9fLicvbm9kZS50eHQnKSldKTsKUEhQCmNobW9kIDY0NCAvdmFyL3d3dy9odG1sL2hlYWx0aC5waHAKc3lzdGVtY3RsIGVuYWJsZSAtLW5vdyBwaHAtZnBtIGh0dHBkIGFtYXpvbi1zc20tYWdlbnQKY2QgL3Zhci93d3cvaHRtbAovdXNyL2xvY2FsL2Jpbi93cCBldmFsICdnbG9iYWwgJHdwZGI7IGlmICgkd3BkYi0+Z2V0X3ZhcigiU0VMRUNUIDEiKSAhPSAxKSB7IGV4aXQoMSk7IH0gZWNobyAiUkRTX0NPTk5FQ1RJT05fT0siLFBIUF9FT0w7IGVjaG8ganNvbl9lbmNvZGUoJHdwZGItPmdldF9yZXN1bHRzKCJTSE9XIFNFU1NJT04gU1RBVFVTIExJS0UgXCJTc2xfY2lwaGVyXCIiKSksUEhQX0VPTDsnIC0tYWxsb3ctcm9vdApjdXJsIC1mc1MgaHR0cDovLzEyNy4wLjAuMS9oZWFsdGgucGhwCnN5c3RlbWN0bCBpcy1hY3RpdmUgcGhwLWZwbSBodHRwZCBhbWF6b24tc3NtLWFnZW50CmRhdGUgLUlzID4gL3Zhci9saWIvdGFzazMvd2ViLXN0YXJ0dXAuZG9uZQplY2hvICJUQVNLM19XRUJfU1RBUlRVUF9DT01QTEVURSBub2RlPSROT0RFICQoZGF0ZSAtSXMpIgo=",
+          "TagSpecifications": [
+            {
+              "ResourceType": "instance",
+              "Tags": [
+                {
+                  "Key": "Project",
+                  "Value": "swe40006-t3"
+                },
+                {
+                  "Key": "Name",
+                  "Value": "swe40006-t3-asg-web"
+                }
+              ]
+            }
+          ],
+          "Monitoring": {
+            "Enabled": true
+          }
+        }
+      }
+    },
+    "WebGroup": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "AutoScalingGroupName": "swe40006-t3-web-asg",
+        "MinSize": "2",
+        "DesiredCapacity": "2",
+        "MaxSize": "4",
+        "VPCZoneIdentifier": [
+          "subnet-00e0984b6e46a2b30",
+          "subnet-0586d7bf48691e495"
+        ],
+        "HealthCheckType": "ELB",
+        "HealthCheckGracePeriod": 300,
+        "DefaultInstanceWarmup": 120,
+        "TargetGroupARNs": [
+          "arn:aws:elasticloadbalancing:ap-southeast-2:783161929831:targetgroup/swe40006-t3-targets/942e54a82080b002"
+        ],
+        "LaunchTemplate": {
+          "LaunchTemplateId": {
+            "Ref": "WebTemplate"
+          },
+          "Version": {
+            "Fn::GetAtt": [
+              "WebTemplate",
+              "LatestVersionNumber"
+            ]
+          }
+        },
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "swe40006-t3",
+            "PropagateAtLaunch": true
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "LaunchTemplateId": {
+      "Value": {
+        "Ref": "WebTemplate"
+      }
+    },
+    "AsgName": {
+      "Value": {
+        "Ref": "WebGroup"
+      }
+    }
+  }
+}

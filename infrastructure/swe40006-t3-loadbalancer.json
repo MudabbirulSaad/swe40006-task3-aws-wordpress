@@ -1,0 +1,107 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Task 3 two-zone public HTTP ALB; backends use private SG access",
+  "Resources": {
+    "Alb": {
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties": {
+        "Name": "swe40006-t3-alb",
+        "Type": "application",
+        "Scheme": "internet-facing",
+        "IpAddressType": "ipv4",
+        "Subnets": [
+          "subnet-00e0984b6e46a2b30",
+          "subnet-0586d7bf48691e495"
+        ],
+        "SecurityGroups": [
+          "sg-016237decc5e171f9"
+        ],
+        "LoadBalancerAttributes": [
+          {
+            "Key": "idle_timeout.timeout_seconds",
+            "Value": "60"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "swe40006-t3"
+          }
+        ]
+      }
+    },
+    "Targets": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+        "Name": "swe40006-t3-targets",
+        "VpcId": "vpc-0688f58a8ec1982ab",
+        "Protocol": "HTTP",
+        "Port": 80,
+        "TargetType": "instance",
+        "HealthCheckEnabled": true,
+        "HealthCheckPath": "/health.php",
+        "HealthCheckProtocol": "HTTP",
+        "HealthCheckIntervalSeconds": 15,
+        "HealthyThresholdCount": 2,
+        "UnhealthyThresholdCount": 3,
+        "Matcher": {
+          "HttpCode": "200"
+        },
+        "TargetGroupAttributes": [
+          {
+            "Key": "deregistration_delay.timeout_seconds",
+            "Value": "30"
+          },
+          {
+            "Key": "stickiness.enabled",
+            "Value": "false"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "swe40006-t3"
+          }
+        ]
+      }
+    },
+    "Listener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "LoadBalancerArn": {
+          "Ref": "Alb"
+        },
+        "Port": 80,
+        "Protocol": "HTTP",
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {
+              "Ref": "Targets"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "AlbArn": {
+      "Value": {
+        "Ref": "Alb"
+      }
+    },
+    "TargetGroupArn": {
+      "Value": {
+        "Ref": "Targets"
+      }
+    },
+    "AlbDns": {
+      "Value": {
+        "Fn::GetAtt": [
+          "Alb",
+          "DNSName"
+        ]
+      }
+    }
+  }
+}
