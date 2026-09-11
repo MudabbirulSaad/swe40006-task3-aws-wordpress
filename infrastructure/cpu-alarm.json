@@ -1,0 +1,33 @@
+{
+  "AlarmName": "swe40006-t3-cpu-high",
+  "AlarmDescription": "Task 3: EC2 average CPU exceeds 70% for two consecutive one-minute periods; SNS email on alarm and recovery. Retarget if this instance is later replaced.",
+  "ActionsEnabled": true,
+  "AlarmActions": [
+    "arn:aws:sns:ap-southeast-2:783161929831:swe40006-t3-alerts"
+  ],
+  "OKActions": [
+    "arn:aws:sns:ap-southeast-2:783161929831:swe40006-t3-alerts"
+  ],
+  "MetricName": "CPUUtilization",
+  "Namespace": "AWS/EC2",
+  "Statistic": "Average",
+  "Dimensions": [
+    {
+      "Name": "InstanceId",
+      "Value": "i-02b08b0a12b4adbd7"
+    }
+  ],
+  "Period": 60,
+  "EvaluationPeriods": 2,
+  "DatapointsToAlarm": 2,
+  "Threshold": 70.0,
+  "ComparisonOperator": "GreaterThanThreshold",
+  "TreatMissingData": "missing",
+  "Unit": "Percent",
+  "Tags": [
+    {
+      "Key": "Project",
+      "Value": "swe40006-t3"
+    }
+  ]
+}
