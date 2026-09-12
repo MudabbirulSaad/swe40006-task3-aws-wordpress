@@ -34,7 +34,16 @@ The generated JSON files contain identifiers from the recorded deployment. They 
 
 ## Local setup
 
-The scripts use the original workspace layout. Place this checkout in a folder called `05_implementation`:
+Install the dependencies in a Python 3.12 environment:
+
+```sh
+python -m pip install -r requirements.txt
+```
+
+The scripts expect this checkout to be named `05_implementation`, with `04_evidence/logs/` and `.private/` in its parent folder. These paths are defined in [`scripts/task3lib.py`](scripts/task3lib.py). Expand the setup details before running a stage.
+
+<details>
+<summary>Workspace layout and AWS setup</summary>
 
 ```text
 task3/
@@ -43,15 +52,13 @@ task3/
   .private/                Local credentials and configuration
 ```
 
-Create the two local working directories before running a stage. Install the dependencies into a Python 3.12 environment:
-
-```text
-python -m pip install -r requirements.txt
-```
+Create `04_evidence/logs/` and `.private/` before running a local stage. All paths below are relative to the `task3/` workspace unless stated otherwise.
 
 The local runner reads `.private/task3-operator-credentials.json`, containing the boto3 fields `aws_access_key_id`, `aws_secret_access_key` and `region_name`. It reads the notification address from `.private/alert-email.txt`. These files stay outside the repository.
 
 Scripts `00` and `01` run in AWS CloudShell using an existing AWS account. The access bootstrap creates the task operator and budget; it writes credentials to `~/task3-private/` and takes the notification address from `TASK3_ALERT_EMAIL`. If using that bootstrap, transfer its credentials securely into the local private directory. The later stages use the operator credentials. The account-owner setup also needs the service-linked roles required by RDS, Elastic Load Balancing and Auto Scaling.
+
+</details>
 
 ## Deployment stages
 
