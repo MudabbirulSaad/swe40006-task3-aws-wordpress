@@ -1,0 +1,653 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Task 3 isolated network, private artifacts, roles and initial local WordPress",
+  "Resources": {
+    "Vpc": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.43.0.0/16",
+        "EnableDnsSupport": true,
+        "EnableDnsHostnames": true,
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "swe40006-t3-vpc"
+          },
+          {
+            "Key": "Project",
+            "Value": "swe40006-t3"
+          }
+        ]
+      }
+    },
+    "InternetGateway": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "swe40006-t3-igw"
+          },
+          {
+            "Key": "Project",
+            "Value": "swe40006-t3"
+          }
+        ]
+      }
+    },
+    "GatewayAttachment": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "InternetGatewayId": {
+          "Ref": "InternetGateway"
+        }
+      }
+    },
+    "PublicRoutes": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "swe40006-t3-public-routes"
+          },
+          {
+            "Key": "Project",
+            "Value": "swe40006-t3"
+          }
+        ]
+      }
+    },
+    "InternetRoute": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PublicRoutes"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "InternetGateway"
+        }
+      },
+      "DependsOn": "GatewayAttachment"
+    },
+    "PrivateRoutes": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "swe40006-t3-private-routes"
+          },
+          {
+            "Key": "Project",
+            "Value": "swe40006-t3"
+          }
+        ]
+      }
+    },
+    "PublicA": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "CidrBlock": "10.43.1.0/24",
+        "AvailabilityZone": "ap-southeast-2a",
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "swe40006-t3-publica"
+          },
+          {
+            "Key": "Project",
+            "Value": "swe40006-t3"
+          }
+        ]
+      }
+    },
+    "PublicARoutes": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "PublicA"
+        },
+        "RouteTableId": {
+          "Ref": "PublicRoutes"
+        }
+      }
+    },
+    "PublicB": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "CidrBlock": "10.43.2.0/24",
+        "AvailabilityZone": "ap-southeast-2b",
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "swe40006-t3-publicb"
+          },
+          {
+            "Key": "Project",
+            "Value": "swe40006-t3"
+          }
+        ]
+      }
+    },
+    "PublicBRoutes": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "PublicB"
+        },
+        "RouteTableId": {
+          "Ref": "PublicRoutes"
+        }
+      }
+    },
+    "PrivateA": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "CidrBlock": "10.43.11.0/24",
+        "AvailabilityZone": "ap-southeast-2a",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "swe40006-t3-privatea"
+          },
+          {
+            "Key": "Project",
+            "Value": "swe40006-t3"
+          }
+        ]
+      }
+    },
+    "PrivateARoutes": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "PrivateA"
+        },
+        "RouteTableId": {
+          "Ref": "PrivateRoutes"
+        }
+      }
+    },
+    "PrivateB": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "CidrBlock": "10.43.12.0/24",
+        "AvailabilityZone": "ap-southeast-2b",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "swe40006-t3-privateb"
+          },
+          {
+            "Key": "Project",
+            "Value": "swe40006-t3"
+          }
+        ]
+      }
+    },
+    "PrivateBRoutes": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "PrivateB"
+        },
+        "RouteTableId": {
+          "Ref": "PrivateRoutes"
+        }
+      }
+    },
+    "PassSG": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Pass web access and SSH only from the task operator IP",
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "swe40006-t3-pass-sg"
+          },
+          {
+            "Key": "Project",
+            "Value": "swe40006-t3"
+          }
+        ],
+        "SecurityGroupIngress": []
+      }
+    },
+    "AlbSG": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Public HTTP entry point",
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "swe40006-t3-alb-sg"
+          },
+          {
+            "Key": "Project",
+            "Value": "swe40006-t3"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 80,
+            "ToPort": 80,
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
+      }
+    },
+    "WebSG": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Backend HTTP from ALB only; no SSH",
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "swe40006-t3-web-sg"
+          },
+          {
+            "Key": "Project",
+            "Value": "swe40006-t3"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 80,
+            "ToPort": 80,
+            "SourceSecurityGroupId": {
+              "Ref": "AlbSG"
+            }
+          }
+        ]
+      }
+    },
+    "DbSG": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Database from task application groups only",
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "swe40006-t3-db-sg"
+          },
+          {
+            "Key": "Project",
+            "Value": "swe40006-t3"
+          }
+        ],
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 3306,
+            "ToPort": 3306,
+            "SourceSecurityGroupId": {
+              "Ref": "WebSG"
+            }
+          }
+        ]
+      }
+    },
+    "Artifacts": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": "swe40006-t3-783161929831-artifacts",
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true
+        },
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+        "VersioningConfiguration": {
+          "Status": "Enabled"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "swe40006-t3-artifacts"
+          },
+          {
+            "Key": "Project",
+            "Value": "swe40006-t3"
+          }
+        ]
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "PassRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "swe40006-t3-pass-role",
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+        ],
+        "Policies": [
+          {
+            "PolicyName": "TaskArtifactsAndConfiguration",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:GetObject",
+                    "s3:PutObject"
+                  ],
+                  "Resource": [
+                    "arn:aws:s3:::swe40006-t3-783161929831-artifacts/backups/*",
+                    "arn:aws:s3:::swe40006-t3-783161929831-artifacts/releases/*",
+                    "arn:aws:s3:::swe40006-t3-783161929831-artifacts/evidence/*"
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": "ssm:GetParameter",
+                  "Resource": [
+                    "arn:aws:ssm:ap-southeast-2:783161929831:parameter/swe40006/t3/runtime/wp-config",
+                    "arn:aws:ssm:ap-southeast-2:783161929831:parameter/swe40006/t3/migration/db-master"
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": "ssm:PutParameter",
+                  "Resource": "arn:aws:ssm:ap-southeast-2:783161929831:parameter/swe40006/t3/runtime/wp-config"
+                },
+                {
+                  "Effect": "Deny",
+                  "Action": [
+                    "ssm:GetParameter",
+                    "ssm:GetParameters",
+                    "ssm:GetParametersByPath"
+                  ],
+                  "NotResource": [
+                    "arn:aws:ssm:ap-southeast-2:783161929831:parameter/swe40006/t3/runtime/wp-config",
+                    "arn:aws:ssm:ap-southeast-2:783161929831:parameter/swe40006/t3/migration/db-master"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "PassRoleProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "InstanceProfileName": "swe40006-t3-pass-profile",
+        "Roles": [
+          {
+            "Ref": "PassRole"
+          }
+        ]
+      }
+    },
+    "WebRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "swe40006-t3-web-role",
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+        ],
+        "Policies": [
+          {
+            "PolicyName": "TaskArtifactsAndConfiguration",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:GetObject"
+                  ],
+                  "Resource": [
+                    "arn:aws:s3:::swe40006-t3-783161929831-artifacts/releases/*"
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": "ssm:GetParameter",
+                  "Resource": [
+                    "arn:aws:ssm:ap-southeast-2:783161929831:parameter/swe40006/t3/runtime/wp-config"
+                  ]
+                },
+                {
+                  "Effect": "Deny",
+                  "Action": [
+                    "ssm:GetParameter",
+                    "ssm:GetParameters",
+                    "ssm:GetParametersByPath"
+                  ],
+                  "NotResource": [
+                    "arn:aws:ssm:ap-southeast-2:783161929831:parameter/swe40006/t3/runtime/wp-config"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "WebRoleProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "InstanceProfileName": "swe40006-t3-web-profile",
+        "Roles": [
+          {
+            "Ref": "WebRole"
+          }
+        ]
+      }
+    },
+    "PassLaunchTemplate": {
+      "Type": "AWS::EC2::LaunchTemplate",
+      "Properties": {
+        "LaunchTemplateName": "swe40006-t3-pass-template",
+        "LaunchTemplateData": {
+          "ImageId": "ami-0fe65665c4d6f0de7",
+          "InstanceType": "t3.micro",
+          "KeyName": "swe40006-t3-pass-key",
+          "SecurityGroupIds": [
+            {
+              "Ref": "PassSG"
+            }
+          ],
+          "IamInstanceProfile": {
+            "Name": {
+              "Ref": "PassRoleProfile"
+            }
+          },
+          "MetadataOptions": {
+            "HttpTokens": "required",
+            "HttpEndpoint": "enabled"
+          },
+          "CreditSpecification": {
+            "CpuCredits": "standard"
+          },
+          "BlockDeviceMappings": [
+            {
+              "DeviceName": "/dev/xvda",
+              "Ebs": {
+                "VolumeSize": 12,
+                "VolumeType": "gp3",
+                "Encrypted": true,
+                "DeleteOnTermination": true
+              }
+            }
+          ],
+          "UserData": "IyEvYmluL2Jhc2gKc2V0IC1FZXVvIHBpcGVmYWlsCnVtYXNrIDA3NwpleGVjID4gPih0ZWUgLWEgL3Zhci9sb2cvdGFzazMtYm9vdHN0cmFwLmxvZykgMj4mMQp0cmFwICdlY2hvICJCT09UU1RSQVBfRVJST1IgbGluZT0kTElORU5PIGV4aXQ9JD8gYXQ9JChkYXRlIC1JcykiJyBFUlIKcnVuKCkgeyBwcmludGYgJ1xuWyVzXSBSVU46JyAiJChkYXRlIC1JcykiOyBwcmludGYgJyAlcScgIiRAIjsgcHJpbnRmICdcbic7ICIkQCI7IH0KcnVuIGNhdCAvZXRjL29zLXJlbGVhc2UKcnVuIGRuZiBpbnN0YWxsIC15IGh0dHBkIHBocCBwaHAtZnBtIHBocC1teXNxbG5kIHBocC1nZCBwaHAteG1sIHBocC1tYnN0cmluZyBtYXJpYWRiMTA1LXNlcnZlciBqcQpydW4gc3lzdGVtY3RsIGVuYWJsZSAtLW5vdyBodHRwZCBwaHAtZnBtIG1hcmlhZGIgYW1hem9uLXNzbS1hZ2VudApydW4gcGhwIC0tdmVyc2lvbgpydW4gbXlzcWwgLS12ZXJzaW9uCnJ1biBzeXN0ZW1jdGwgaXMtYWN0aXZlIGh0dHBkIHBocC1mcG0gbWFyaWFkYiBhbWF6b24tc3NtLWFnZW50CnJ1biBjdXJsIC1mc1NMIC0tcmV0cnkgMyBodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vd3AtY2xpL2J1aWxkcy9naC1wYWdlcy9waGFyL3dwLWNsaS5waGFyIC1vIC91c3IvbG9jYWwvYmluL3dwCnJ1biBjaG1vZCA3NTUgL3Vzci9sb2NhbC9iaW4vd3AKcnVuIHNoYTI1NnN1bSAvdXNyL2xvY2FsL2Jpbi93cApydW4gL3Vzci9sb2NhbC9iaW4vd3AgLS1pbmZvCmluc3RhbGwgLWQgLW0gNzAwIC9yb290L3Rhc2szLXByaXZhdGUKb3BlbnNzbCByYW5kIC1oZXggMjQgPiAvcm9vdC90YXNrMy1wcml2YXRlL2xvY2FsLWRiLXBhc3N3b3JkCm9wZW5zc2wgcmFuZCAtaGV4IDI0ID4gL3Jvb3QvdGFzazMtcHJpdmF0ZS93cC1hZG1pbi1wYXNzd29yZAojIFNlY3JldCB2YWx1ZXMgYXJlIHN1cHBsaWVkIHByaXZhdGVseSB0byB0aGUgZGF0YWJhc2UvY29uZmlndXJhdGlvbiBjb21tYW5kcy4KREJfUEFTU1dPUkQ9JChjYXQgL3Jvb3QvdGFzazMtcHJpdmF0ZS9sb2NhbC1kYi1wYXNzd29yZCkKbXlzcWwgPDxTUUwKQ1JFQVRFIERBVEFCQVNFIHdvcmRwcmVzc19kYiBDSEFSQUNURVIgU0VUIHV0ZjhtYjQgQ09MTEFURSB1dGY4bWI0X3VuaWNvZGVfY2k7CkNSRUFURSBVU0VSICd3cF91c2VyJ0AnbG9jYWxob3N0JyBJREVOVElGSUVEIEJZICcke0RCX1BBU1NXT1JEfSc7CkdSQU5UIEFMTCBQUklWSUxFR0VTIE9OIHdvcmRwcmVzc19kYi4qIFRPICd3cF91c2VyJ0AnbG9jYWxob3N0JzsKU1FMCmVjaG8gIkNyZWF0ZWQgYXBwbGljYXRpb24gZGF0YWJhc2UgYW5kIGxvY2FsIGFwcGxpY2F0aW9uIHVzZXI7IHNlY3JldCBub3QgbG9nZ2VkLiIKY2QgL3Zhci93d3cvaHRtbApydW4gL3Vzci9sb2NhbC9iaW4vd3AgY29yZSBkb3dubG9hZCAtLWFsbG93LXJvb3QKL3Vzci9sb2NhbC9iaW4vd3AgY29uZmlnIGNyZWF0ZSAtLWFsbG93LXJvb3QgLS1kYm5hbWU9d29yZHByZXNzX2RiIC0tZGJ1c2VyPXdwX3VzZXIgLS1kYnBhc3M9IiREQl9QQVNTV09SRCIgLS1kYmhvc3Q9bG9jYWxob3N0CnVuc2V0IERCX1BBU1NXT1JEClRPS0VOPSQoY3VybCAtZnNTIC1YIFBVVCBodHRwOi8vMTY5LjI1NC4xNjkuMjU0L2xhdGVzdC9hcGkvdG9rZW4gLUggJ1gtYXdzLWVjMi1tZXRhZGF0YS10b2tlbi10dGwtc2Vjb25kczogNjAnKQpQVUJMSUNfSVA9JChjdXJsIC1mc1MgLUggIlgtYXdzLWVjMi1tZXRhZGF0YS10b2tlbjogJFRPS0VOIiBodHRwOi8vMTY5LjI1NC4xNjkuMjU0L2xhdGVzdC9tZXRhLWRhdGEvcHVibGljLWlwdjQpCi91c3IvbG9jYWwvYmluL3dwIGNvcmUgaW5zdGFsbCAtLWFsbG93LXJvb3QgLS11cmw9Imh0dHA6Ly8kUFVCTElDX0lQIiAtLXRpdGxlPSdUYXNrIDMgV29yZFByZXNzIERlcGxveW1lbnQgTGFiJyAtLWFkbWluX3VzZXI9dDNhZG1pbiAtLWFkbWluX3Bhc3N3b3JkPSIkKGNhdCAvcm9vdC90YXNrMy1wcml2YXRlL3dwLWFkbWluLXBhc3N3b3JkKSIgLS1hZG1pbl9lbWFpbD1hZG1pbkBleGFtcGxlLmludmFsaWQgLS1za2lwLWVtYWlsCnJ1biAvdXNyL2xvY2FsL2Jpbi93cCBwb3N0IGNyZWF0ZSAtLWFsbG93LXJvb3QgLS1wb3N0X3N0YXR1cz1wdWJsaXNoIC0tcG9zdF90aXRsZT0nVGFzayAzIGJhc2VsaW5lIHJlY29yZCcgLS1wb3N0X2NvbnRlbnQ9IkRlcGxveW1lbnQgdGVzdCBmaXh0dXJlIGNyZWF0ZWQgYXQgJChkYXRlIC11ICslRlQlVFopLiBUaGlzIHJlY29yZCB3aWxsIGJlIGNoZWNrZWQgYmVmb3JlIGFuZCBhZnRlciBtaWdyYXRpb24gdG8gUkRTLiIgLS1wb3JjZWxhaW4KcnVuIC91c3IvbG9jYWwvYmluL3dwIGNvcmUgdmVyc2lvbiAtLWFsbG93LXJvb3QKcnVuIC91c3IvbG9jYWwvYmluL3dwIGRiIHF1ZXJ5ICdTRUxFQ1QgSUQscG9zdF90aXRsZSxwb3N0X3N0YXR1cyBGUk9NIHdwX3Bvc3RzIFdIRVJFIHBvc3RfdHlwZT0icG9zdCI7IFNFTEVDVCBDT1VOVCgqKSBBUyBwb3N0X3Jvd3MgRlJPTSB3cF9wb3N0czsnIC0tYWxsb3ctcm9vdApydW4gY2hvd24gLVIgYXBhY2hlOmFwYWNoZSAvdmFyL3d3dy9odG1sCmZpbmQgL3Zhci93d3cvaHRtbCAtdHlwZSBkIC1leGVjIGNobW9kIDc1NSB7fSBcOwpmaW5kIC92YXIvd3d3L2h0bWwgLXR5cGUgZiAtZXhlYyBjaG1vZCA2NDQge30gXDsKY2hvd24gcm9vdDphcGFjaGUgL3Zhci93d3cvaHRtbC93cC1jb25maWcucGhwCmNobW9kIDY0MCAvdmFyL3d3dy9odG1sL3dwLWNvbmZpZy5waHAKcnVuIGN1cmwgLWZzUyAtbyAvZGV2L251bGwgLXcgJ0hUVFBfUkVTVUxUPSV7aHR0cF9jb2RlfVxuJyAiaHR0cDovLyRQVUJMSUNfSVAvIgpta2RpciAtcCAvdmFyL2xpYi90YXNrMwpkYXRlIC1JcyA+IC92YXIvbGliL3Rhc2szL2Jvb3RzdHJhcC5kb25lCmVjaG8gIlRBU0szX1BBU1NfQk9PVFNUUkFQX0NPTVBMRVRFIHB1YmxpY19pcD0kUFVCTElDX0lQIGF0PSQoZGF0ZSAtSXMpIgo="
+        }
+      }
+    },
+    "PassInstance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "LaunchTemplate": {
+          "LaunchTemplateId": {
+            "Ref": "PassLaunchTemplate"
+          },
+          "Version": {
+            "Fn::GetAtt": [
+              "PassLaunchTemplate",
+              "LatestVersionNumber"
+            ]
+          }
+        },
+        "SubnetId": {
+          "Ref": "PublicA"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "swe40006-t3-pass"
+          },
+          {
+            "Key": "Project",
+            "Value": "swe40006-t3"
+          }
+        ]
+      },
+      "DependsOn": "InternetRoute"
+    }
+  },
+  "Outputs": {
+    "Vpc": {
+      "Value": {
+        "Ref": "Vpc"
+      }
+    },
+    "PublicA": {
+      "Value": {
+        "Ref": "PublicA"
+      }
+    },
+    "PublicB": {
+      "Value": {
+        "Ref": "PublicB"
+      }
+    },
+    "PrivateA": {
+      "Value": {
+        "Ref": "PrivateA"
+      }
+    },
+    "PrivateB": {
+      "Value": {
+        "Ref": "PrivateB"
+      }
+    },
+    "PassSG": {
+      "Value": {
+        "Ref": "PassSG"
+      }
+    },
+    "AlbSG": {
+      "Value": {
+        "Ref": "AlbSG"
+      }
+    },
+    "WebSG": {
+      "Value": {
+        "Ref": "WebSG"
+      }
+    },
+    "DbSG": {
+      "Value": {
+        "Ref": "DbSG"
+      }
+    },
+    "PassInstance": {
+      "Value": {
+        "Ref": "PassInstance"
+      }
+    },
+    "WebRoleProfile": {
+      "Value": {
+        "Ref": "WebRoleProfile"
+      }
+    },
+    "PassRoleProfile": {
+      "Value": {
+        "Ref": "PassRoleProfile"
+      }
+    },
+    "Bucket": {
+      "Value": {
+        "Ref": "Artifacts"
+      }
+    }
+  }
+}
